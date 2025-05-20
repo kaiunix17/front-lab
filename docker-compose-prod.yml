@@ -1,0 +1,6 @@
+services:
+  web:
+    image: "123321"
+    restart: unless-stopped
+    ports:
+      - "3051:3050"

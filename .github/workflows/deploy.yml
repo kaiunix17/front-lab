@@ -39,6 +39,6 @@ jobs: # bajariladigan ishlar buyerda deploy test build. 1ta job bor deplooy serv
 
 
 # Umumiy logika quyidagicha git repoga kodni o'zgartirib main branchga push qilganimizdan keyin ci/cd ishlay boshlaydi.
-#Github action bu ci/cd ishlarini ubuntu serverini ichiga amalga oshiradi. (300 soatlik limiti mavjud undan o'tsa pul to'laymiz).
+# Github action bu ci/cd ishlarini ubuntu serverini ichiga amalga oshiradi. (300 soatlik limiti mavjud undan o'tsa pul to'laymiz).
 # Repositoryni github ubuntu-serveriga yuklaydi undan keyin esa package-lock.json filedagi packagelarni yuklab oladi node-modules orqalli barcha packeagelarni yuklab bulganidan so'ng esa ssh orqali prod-serverimizga ssh orqali kirib u filelarni hammasini prod-serverga ko'chiramiz.
 # Ko'chirib bo'lganimizdan so'ng o'zgarishlarni amalga oshiris uchun applicationimizga restart beramiz.
