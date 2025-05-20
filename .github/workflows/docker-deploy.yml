@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build and push docker
-        working-directory: ./
+        working-directory: ./my-node-app
         run: |
           docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
           docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
