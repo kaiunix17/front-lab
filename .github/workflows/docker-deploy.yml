@@ -1,4 +1,4 @@
-name: Deploy app with docker a
+name: Deploy app with docker
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         working-directory: ./my-node-app
         run: |
           docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
-          docker login registry.digitalocean.com -u docean -p dop_v1_464fe841e0f03e305c4383827ddf7f9f36b0557c857f495017cc7baa24ac2eac
+          docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
           docker push registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
 
   deploy:
@@ -52,6 +52,6 @@ jobs:
           script: |
             cd /opt/my-node-app-on-docker
             mv docker-compose-prod.yaml docker-compose.yaml
-            docker login registry.digitalocean.com -u docean -p dop_v1_464fe841e0f03e305c4383827ddf7f9f36b0557c857f495017cc7baa24ac2eac
+            docker login registry.digitalocean.com -u paulbundy07@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
             yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yaml
             docker compose up -d --remove-orphans
