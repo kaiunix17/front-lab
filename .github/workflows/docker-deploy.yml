@@ -1,4 +1,4 @@
-name: Deploy app with dockera
+name: Deploy app with docker
 
 on:
   push:
@@ -6,13 +6,12 @@ on:
       - main
   workflow_dispatch:
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     outputs:
-      image_name: registry.digitalocean.com/my-container-registry123/my-node-app:${{ github.sha }}
+      image_name: registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +20,7 @@ jobs:
         working-directory: ./my-node-app
         run: |
           docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
-          docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+          echo ${{ secrets.REGISTRY_TOKEN }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USER }} --password-stdin
           docker push registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
 
   deploy:
@@ -52,6 +51,6 @@ jobs:
           script: |
             cd /opt/my-node-app-on-docker
             mv docker-compose-prod.yaml docker-compose.yaml
-            docker login registry.digitalocean.com -u paulbundy07@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+            echo ${{ secrets.REGISTRY_TOKEN }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USER }} --password-stdin
             yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yaml
             docker compose up -d --remove-orphans
