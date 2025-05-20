@@ -12,17 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      image_name: registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
+      image_name: registry.digitalocean.com/kyiv-registry:${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build and push docker
-        working-directory: ./my-node-app
+        working-directory: ./
         run: |
-          docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
+          docker build -t registry.digitalocean.com/kyiv-registry:${{ github.sha }} .
           docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
-          docker push registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
+          docker push registry.digitalocean.com/kyiv-registry:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
