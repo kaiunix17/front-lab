@@ -1,6 +1,6 @@
 services:
   web:
-    build: .
+    build: ..
     restart: unless-stopped
     ports:
       - "3050:3050"

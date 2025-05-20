@@ -12,17 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      image_name: registry.digitalocean.com/kyiv-registry:${{ github.sha }}
+      image_name: registry.digitalocean.com/my-container-registry123/my-node-app:${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build and push docker
-        working-directory: ./
+        working-directory: ./my-node-app
         run: |
-          docker build -t registry.digitalocean.com/kyiv-registry:${{ github.sha }} .
-          docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
-          docker push registry.digitalocean.com/kyiv-registry:${{ github.sha }}
+          docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
+          docker login registry.digitalocean.com -u docean -p dop_v1_464fe841e0f03e305c4383827ddf7f9f36b0557c857f495017cc7baa24ac2eac
+          docker push registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "./docker-compose-prod.yaml"
+          source: "./my-node-app/docker-compose-prod.yaml"
           target: "/opt/my-node-app-on-docker/"
           strip_components: 2
 
@@ -52,6 +52,6 @@ jobs:
           script: |
             cd /opt/my-node-app-on-docker
             mv docker-compose-prod.yaml docker-compose.yaml
-            docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+            docker login registry.digitalocean.com -u docean -p dop_v1_464fe841e0f03e305c4383827ddf7f9f36b0557c857f495017cc7baa24ac2eac
             yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yaml
             docker compose up -d --remove-orphans
