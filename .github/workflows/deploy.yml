@@ -35,7 +35,7 @@ jobs: # bajariladigan ishlar buyerda deploy test build. 1ta job bor deplooy serv
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: systemctl restart my-node-app
+          script: systemctl restart cicd-app
 
 
 # Umumiy logika quyidagicha git repoga kodni o'zgartirib main branchga push qilganimizdan keyin ci/cd ishlay boshlaydi.
