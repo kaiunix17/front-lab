@@ -1,4 +1,4 @@
-name: Deploy app with docker
+name: Deploy app with dockera
 
 on:
   push:
