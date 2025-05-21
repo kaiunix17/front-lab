@@ -1,4 +1,41 @@
+#name: Deploy app with docker
+#on:
+#  push:
+#    branches:
+#      - main
+#  workflow_dispatch:
+#
+#jobs:
+#  build-and-deploy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Build and push docker
+#        working-directory: ./my-node-app
+#        run: |
+#          docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
+#          docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+#          docker push registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
+#
+#      - name: Deploy via SSH
+#        uses: appleboy/ssh-action@v1
+#        with:
+#          host: ${{ secrets.SSH_HOST }}
+#          username: ${{ secrets.SSH_USERNAME }}
+#          key: ${{ secrets.SSH_KEY }}
+#          source: "./my-node-app/docker-compose-prod.yaml"
+#          target: "/opt/my-node-app-on-docker/"
+#          port: ${{ secrets.SSH_PORT }}
+#          script: |
+#            cd /opt/my-node-app-on-docker
+#            mv docker-compose-prod.yaml docker-compose.yaml
+#            docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+#            yq -i '.services.web.image = "registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}"' docker-compose.yml
+#            docker compose up -d --remove-orphans
+
 name: Deploy app with docker
+
 on:
   push:
     branches:
@@ -6,28 +43,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Build and push docker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image name
+        id: vars
+        run: echo "IMAGE_NAME=registry.digitalocean.com/my-container-registry123/my-node-app:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build and Push Docker image
         working-directory: ./my-node-app
         run: |
-          docker build -t registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }} .
-          docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
-          docker push registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}
+          docker build -t $IMAGE_NAME .
+          docker login registry.digitalocean.com -u paulbundy07@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+          docker push $IMAGE_NAME
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
+      - name: Copy and Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_USER: ${{ secrets.SSH_USERNAME }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          echo "$SSH_KEY" > key.pem
+          chmod 600 key.pem
+
+          echo "📦 SCP file to remote server..."
+          scp -i key.pem -P $SSH_PORT ./my-node-app/docker-compose-prod.yaml $SSH_USER@$SSH_HOST:/opt/my-node-app-on-docker/
+
+          echo "🚀 Deploy on remote server..."
+          ssh -i key.pem -p $SSH_PORT $SSH_USER@$SSH_HOST << EOF
+            set -e
             cd /opt/my-node-app-on-docker
             mv docker-compose-prod.yaml docker-compose.yaml
-            docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
-            yq -i '.services.web.image = "registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}"' docker-compose.yml
+            docker login registry.digitalocean.com -u paulbundy07@gmail.com -p $REGISTRY_TOKEN
+            yq -i '.services.web.image = "$IMAGE_NAME"' docker-compose.yaml
             docker compose up -d --remove-orphans
+          EOF
