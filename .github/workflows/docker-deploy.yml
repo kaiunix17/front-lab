@@ -53,5 +53,5 @@ jobs:
             cd /opt/my-node-app-on-docker
             mv docker-compose-prod.yml docker-compose.yml
             docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
-            yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yaml
+            yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yml
             docker compose up -d --remove-orphans
