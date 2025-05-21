@@ -3,4 +3,4 @@ services:
     image: ""
     restart: unless-stopped
     ports:
-      - "3051:3050"
+      - "3051:3051"
