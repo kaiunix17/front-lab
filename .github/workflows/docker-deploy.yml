@@ -43,7 +43,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -52,13 +52,13 @@ jobs:
 
       - name: Set image name
         id: vars
-        run: echo "IMAGE_NAME=registry.digitalocean.com/my-container-registry123/my-node-app:${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "IMAGE_NAME=registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Build and Push Docker image
         working-directory: ./my-node-app
         run: |
           docker build -t $IMAGE_NAME .
-          docker login registry.digitalocean.com -u paulbundy07@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
+          docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
           docker push $IMAGE_NAME
 
       - name: Copy and Deploy over SSH
@@ -81,7 +81,7 @@ jobs:
             set -e
             cd /opt/my-node-app-on-docker
             mv docker-compose-prod.yaml docker-compose.yaml
-            docker login registry.digitalocean.com -u paulbundy07@gmail.com -p $REGISTRY_TOKEN
+            docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p $REGISTRY_TOKEN
             yq -i '.services.web.image = "$IMAGE_NAME"' docker-compose.yaml
             docker compose up -d --remove-orphans
           EOF
