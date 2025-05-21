@@ -3,4 +3,4 @@ services:
     build: ..
     restart: unless-stopped
     ports:
-      - "3051:3051"
+      - "3050:3050"
