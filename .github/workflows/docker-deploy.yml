@@ -40,7 +40,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           source: "./my-node-app/docker-compose-prod.yml"
           target: "/opt/my-node-app-on-docker/"
-          strip_components: 2
+          strip_components: 1  # Adjust this value
 
       - name: Restart docker compose
         uses: appleboy/ssh-action@v1
@@ -50,8 +50,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            mkdir -p /opt/my-node-app-on-docker
             cd /opt/my-node-app-on-docker
-            mv docker-compose-prod.yaml docker-compose.yaml
+            mv docker-compose-prod.yaml docker-compose.yaml || true  # Avoid failing if file doesn't exist yet
             docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
             yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yaml
             docker compose up -d --remove-orphans
