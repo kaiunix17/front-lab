@@ -27,6 +27,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /opt/my-node-app-on-docker
+            mv docker-compose-prod.yaml docker-compose.yaml
             docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
             yq -i '.services.web.image = "registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}"' docker-compose.yml
             docker compose up -d --remove-orphans
