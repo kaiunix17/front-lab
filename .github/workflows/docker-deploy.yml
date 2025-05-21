@@ -24,12 +24,12 @@
 #          host: ${{ secrets.SSH_HOST }}
 #          username: ${{ secrets.SSH_USERNAME }}
 #          key: ${{ secrets.SSH_KEY }}
-#          source: "./my-node-app/docker-compose-prod.yaml"
+#          source: "./my-node-app/docker-compose-prod.yml"
 #          target: "/opt/my-node-app-on-docker/"
 #          port: ${{ secrets.SSH_PORT }}
 #          script: |
 #            cd /opt/my-node-app-on-docker
-#            mv docker-compose-prod.yaml docker-compose.yaml
+#            mv docker-compose-prod.yml docker-compose.yml
 #            docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
 #            yq -i '.services.web.image = "registry.digitalocean.com/kyiv-registry/my-node-app:${{ github.sha }}"' docker-compose.yml
 #            docker compose up -d --remove-orphans
@@ -74,14 +74,14 @@ jobs:
           chmod 600 key.pem
 
           echo "📦 SCP file to remote server..."
-          scp -i key.pem -P $SSH_PORT ./my-node-app/docker-compose-prod.yaml $SSH_USER@$SSH_HOST:/opt/my-node-app-on-docker/
+          scp -i key.pem -P $SSH_PORT ./my-node-app/docker-compose-prod.yml $SSH_USER@$SSH_HOST:/opt/my-node-app-on-docker/
 
           echo "🚀 Deploy on remote server..."
           ssh -i key.pem -p $SSH_PORT $SSH_USER@$SSH_HOST << EOF
             set -e
             cd /opt/my-node-app-on-docker
-            mv docker-compose-prod.yaml docker-compose.yaml
+            mv docker-compose-prod.yml docker-compose.yml
             docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p $REGISTRY_TOKEN
-            yq -i '.services.web.image = "$IMAGE_NAME"' docker-compose.yaml
+            yq -i '.services.web.image = "$IMAGE_NAME"' docker-compose.yml
             docker compose up -d --remove-orphans
           EOF
