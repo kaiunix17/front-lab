@@ -1,0 +1,44 @@
+name: Deploy app to server
+
+on: # qanday holatda workflow run bulishini belgilaymiz
+  push: # main brangcha push bulsa workflow ishga tushadi
+    branches:
+      - main
+  workflow_dispatch: # workflowni qo'lda ishga tushirish mumkin
+
+
+jobs: # bajariladigan ishlar buyerda deploy test build. 1ta job bor deplooy serverga yuklaymiz bo'ldi
+  deploy:
+    runs-on: ubuntu-latest # github action eng so'ngi ubuntu vm ishga tushiradi.
+
+    steps:
+      - uses: actions/checkout@v4 #reponi kodlarini yuklab olishchun
+
+      - name: npm install packages # working directoryga kirib npm ci buyrugini bajradi yani package-lock.json dagi barcha packagelarni yuklab oladi. nimaga npm ci sababi node_modules papkani birinchi tozalaydi undan so'ng faqatgina package-lock.jsonga qarab packagelarni o'rnatadi.
+        working-directory: ./
+        run: npm ci
+
+      - name: Copy files via SSH # packegalarni install qilganimizdan so'ng real serverga yuboramiz filelarni hammasini. appleyboy/scp-action@v1 orqali yuboramiz real serverga. secretslarni biz githubga joylashtirganmiz repoga kiramiz settins bo'limiga o'tamiz uyoqdan secutiry bulimidan secret and variablesga o'tib actionga new repository yaratamiz va secretlar add qib chiqamiz. Github action scp qilayotganda serverimizga shu secretlardagi valuelar orqali kiradi va filarlarni folderlarni kuchiradi. source bu filelar papkasini target yani real serverimizdagi folderga ko'chiradi.
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "./"
+          target: /opt/front-lab/
+
+      - name: Execute remote SSH commands using password # ssh orqali ulanamiz va node.js appimizni restart qilamiz o'zgarishlar ko'rinisi uchun.
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: systemctl restart cicd-app
+
+
+# Umumiy logika quyidagicha git repoga kodni o'zgartirib main branchga push qilganimizdan keyin ci/cd ishlay boshlaydi.
+# Github action bu ci/cd ishlarini ubuntu serverini ichiga amalga oshiradi. (300 soatlik limiti mavjud undan o'tsa pul to'laymiz).
+# Repositoryni github ubuntu-serveriga yuklaydi undan keyin esa package-lock.json filedagi packagelarni yuklab oladi node-modules orqalli barcha packeagelarni yuklab bulganidan so'ng esa ssh orqali prod-serverimizga ssh orqali kirib u filelarni hammasini prod-serverga ko'chiramiz.
+# Ko'chirib bo'lganimizdan so'ng o'zgarishlarni amalga oshiris uchun applicationimizga restart beramiz.
