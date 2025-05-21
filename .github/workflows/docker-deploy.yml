@@ -39,7 +39,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "./my-node-app/docker-compose-prod.yml"
-          target: "/opt/my-node-app-on-docker/"
+          target: "/opt/my-node-app-on-docker/docker-compose.yml"
           strip_components: 1
 
       - name: Restart docker compose
@@ -51,7 +51,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /opt/my-node-app-on-docker
-            mv docker-compose-prod.yml docker-compose.yml
             docker login registry.digitalocean.com -u ismoilovshohabbos25@gmail.com -p ${{ secrets.REGISTRY_TOKEN }}
             yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yml
             docker compose up -d --remove-orphans
